@@ -24,3 +24,4 @@ Include a 5-Day Forecast below the current weather conditions. Each day for the 
 >Date/Icon Image/Temperature/Humidity 
 
 
+link: file:///C:/Users/15204/code/homework/Weather-Dashboard/index.html

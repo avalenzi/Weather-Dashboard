@@ -1,5 +1,5 @@
 //Urls
-// var currentWeather =  "http://api.openweathermap.org/data/2.5/weather?q=" + searchValue + "&appid=7ba67ac190f85fdba2e2dc6b9d32e93c&units=imperial";
+// var currentWeather = "http://api.openweathermap.org/data/2.5/weather?q=" + searchValue + "&appid=7ba67ac190f85fdba2e2dc6b9d32e93c&units=imperial";
 // Forecast: "http://api.openweathermap.org/data/2.5/forecast?q=" + searchValue + "&appid=7ba67ac190f85fdba2e2dc6b9d32e93c&units=imperial"
 // Icon: "http://openweathermap.org/img/w/" + data.list[i].weather[0].icon + ".png"
 
@@ -79,3 +79,75 @@ $(document).ready(function () {
                     $uv.addClass("severe");
                 }
             });
+
+            // last AJAX call to get forecast information
+            var forecastQueryUrl =
+                "https://api.openweathermap.org/data/2.5/forecast?q=" +
+                search +
+                "&appid=" +
+                apiKey +
+                "&units=imperial";
+
+            $.ajax({
+                url: forecastQueryUrl,
+                method: "GET"
+            }).then(function (result) {
+                var day = 1;
+                result.list.forEach(function (data) {
+                    if (data.dt_txt.includes("15:00")) {
+                        $("#Day" + day).text(moment.unix(data.dt).format("MM/DD/YYYY"));
+                        $("#forecastSymbol" + day).attr(
+                            "src",
+                            "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png"
+                        );
+                        $("#forecastTemp" + day).text("Temp: " + data.main.temp + "°F");
+                        $("#forecastHumidity" + day).text(
+                            "Humidity: " + data.main.humidity + "%"
+                        );
+                        day++;
+                    }
+                });
+            });
+        });
+    }
+
+    // function to store search in localStorage
+    function storeSearch(search) {
+        // return from function early if submitted search 
+        if (search === "" || searchArray.includes(search)) {
+            return;
+        }
+        // localStorage.setItem("search", JSON.stringify(search));
+        searchArray.push(search);
+        // set array to local storage
+        localStorage.setItem("localSearch", JSON.stringify(searchArray));
+        // clear input from search form
+        $search.val("");
+
+        getSearch();
+    }
+
+    // function built to get search from localStorage
+    function getSearch() {
+        // clear out button
+        $("#listOfCities").empty();
+        // run for loop to dynamically add div and button 
+        for (var i = 0; i < searchArray.length; i++) {
+            var div = $("<div>");
+            var button = $("<button>");
+            button.attr("class", "btn-lg btn-block city").text(searchArray[i]);
+            button.attr("id", searchArray[i]);
+
+            // prepending div to DOM and appending button 
+            $("#listOfCities").prepend(div);
+            div.append(button);
+        }
+    }
+
+    $("#listOfCities").on("click", ".city", function (e) {
+        e.preventDefault();
+        var search = $(this).text();
+        $(".hide").removeClass("hide");
+        getWeather(search);
+    });
+});
